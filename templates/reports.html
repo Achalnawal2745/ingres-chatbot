@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports — INGRES Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
+    .navbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{display:flex;align-items:center;gap:10px}
+    .nav-logo{width:34px;height:34px;background:#1a56db;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+    .nav-title{font-size:15px;font-weight:600}
+    .nav-sub{font-size:11px;color:#64748b}
+    .nav-links{display:flex;gap:2px}
+    .nav-link{padding:6px 14px;border-radius:8px;font-size:13px;color:#64748b;text-decoration:none}
+    .nav-link:hover{background:#f1f5f9;color:#1e293b}
+    .nav-link.active{background:#eff6ff;color:#1a56db;font-weight:500}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .nav-badge{background:#1a56db;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px}
+    .nav-avatar{width:30px;height:30px;border-radius:50%;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#64748b}
+    .page{max-width:1100px;margin:0 auto;padding:24px 16px}
+    .page-title{font-size:22px;font-weight:600;margin-bottom:4px}
+    .page-sub{font-size:13px;color:#64748b;margin-bottom:20px}
+    .search-bar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 16px;display:flex;gap:10px;align-items:center;margin-bottom:16px}
+    .search-bar input{flex:1;border:none;background:none;font-size:13px;outline:none;color:#1e293b}
+    .search-bar input::placeholder{color:#94a3b8}
+    .reports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+    .report-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:box-shadow 0.15s}
+    .report-card:hover{border-color:#bfdbfe}
+    .report-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .report-top{display:flex;gap:12px;align-items:flex-start}
+    .report-title{font-size:14px;font-weight:600;color:#1e293b;line-height:1.4}
+    .report-meta{font-size:12px;color:#64748b;margin-top:2px}
+    .report-tags{display:flex;gap:5px;flex-wrap:wrap}
+    .rtag{font-size:11px;padding:2px 8px;border:1px solid #e2e8f0;border-radius:20px;color:#64748b;background:#f8fafc}
+    .report-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:10px}
+    .report-size{font-size:11px;color:#94a3b8}
+    .download-btn{padding:6px 14px;background:#eff6ff;color:#1a56db;border:1px solid #bfdbfe;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:5px}
+    .download-btn:hover{background:#dbeafe}
+    .section-label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin:16px 0 8px}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">💧</div>
+    <div><div class="nav-title">INGRES Portal</div><div class="nav-sub">India Ground Water Resource Estimation System · CGWB</div></div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Dashboard</a>
+    <a class="nav-link" href="/assessment">Assessment</a>
+    <a class="nav-link active" href="/reports">Reports</a>
+    <a class="nav-link" href="/gis-maps">GIS Maps</a>
+    <a class="nav-link" href="/about">About</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">AI Assistant</span>
+    <div class="nav-avatar"><i class="ti ti-user"></i></div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-title">Reports & Publications</div>
+  <div class="page-sub">Official CGWB groundwater assessment reports and guidelines</div>
+
+  <div class="search-bar">
+    <i class="ti ti-search" style="color:#94a3b8;font-size:16px"></i>
+    <input type="text" id="searchInput" placeholder="Search reports..." oninput="filterReports()"/>
+  </div>
+
+  <div class="section-label">National Assessment Reports</div>
+  <div class="reports-grid" id="reportGrid"></div>
+</div>
+
+<script>
+const REPORTS = [
+  {title:"Dynamic Ground Water Resources of India 2022",year:"2022",type:"National",size:"12.4 MB",icon:"📊",tags:["Assessment","2022","National"],url:"https://cgwb.gov.in/documents/Dynamic-GW-Resources-India-2022.pdf"},
+  {title:"Ground Water Year Book 2021-22",year:"2022",type:"Annual Report",size:"8.2 MB",icon:"📅",tags:["Year Book","2022","Monitoring"],url:"#"},
+  {title:"National Aquifer Mapping Programme",year:"2021",type:"Mapping",size:"15.6 MB",icon:"🗺️",tags:["Aquifer","Mapping","NAQUIM"],url:"#"},
+  {title:"Dynamic Ground Water Resources of India 2020",year:"2020",type:"National",size:"11.1 MB",icon:"📊",tags:["Assessment","2020","National"],url:"#"},
+  {title:"Ground Water Estimation Methodology 2015",year:"2015",type:"Guidelines",size:"3.4 MB",icon:"📋",tags:["Methodology","Guidelines","GEC"],url:"#"},
+  {title:"Ground Water Resource Estimation Committee Report",year:"2017",type:"Committee",size:"5.8 MB",icon:"📄",tags:["GEC","Methodology","2017"],url:"#"},
+  {title:"Aquifer Systems of India",year:"2019",type:"Reference",size:"22.1 MB",icon:"🔬",tags:["Aquifer","Reference","Geology"],url:"#"},
+  {title:"State Groundwater Profile — Punjab",year:"2022",type:"State Report",size:"4.2 MB",icon:"📍",tags:["Punjab","State","Over-Exploited"],url:"#"},
+  {title:"State Groundwater Profile — Rajasthan",year:"2022",type:"State Report",size:"5.1 MB",icon:"📍",tags:["Rajasthan","State","Arid"],url:"#"},
+  {title:"Groundwater Management in Over-Exploited Areas",year:"2021",type:"Guidelines",size:"2.9 MB",icon:"⚠️",tags:["Management","Policy","Over-Exploited"],url:"#"},
+  {title:"Artificial Recharge to Ground Water Guidelines",year:"2019",type:"Guidelines",size:"6.3 MB",icon:"💧",tags:["Recharge","Artificial","Guidelines"],url:"#"},
+  {title:"INGRES Technical Manual",year:"2023",type:"Technical",size:"1.8 MB",icon:"⚙️",tags:["INGRES","Technical","Manual"],url:"#"},
+];
+
+let filtered = [...REPORTS];
+
+function renderReports() {
+  const grid = document.getElementById("reportGrid");
+  grid.innerHTML = filtered.map(r=>`
+    <div class="report-card">
+      <div class="report-top">
+        <div class="report-icon" style="background:#eff6ff">${r.icon}</div>
+        <div>
+          <div class="report-title">${r.title}</div>
+          <div class="report-meta">${r.type} · ${r.year}</div>
+        </div>
+      </div>
+      <div class="report-tags">${r.tags.map(t=>`<span class="rtag">${t}</span>`).join("")}</div>
+      <div class="report-footer">
+        <span class="report-size"><i class="ti ti-file" style="font-size:11px"></i> ${r.size}</span>
+        <a class="download-btn" href="${r.url}" target="_blank">
+          <i class="ti ti-download" style="font-size:12px"></i> Download
+        </a>
+      </div>
+    </div>`).join("");
+}
+
+function filterReports() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  filtered = REPORTS.filter(r=>
+    r.title.toLowerCase().includes(q) ||
+    r.tags.some(t=>t.toLowerCase().includes(q)) ||
+    r.type.toLowerCase().includes(q)
+  );
+  renderReports();
+}
+
+renderReports();
+</script>
+</body>
+</html>

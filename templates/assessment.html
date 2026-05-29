@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assessment — INGRES Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
+    .navbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{display:flex;align-items:center;gap:10px}
+    .nav-logo{width:34px;height:34px;background:#1a56db;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+    .nav-title{font-size:15px;font-weight:600}
+    .nav-sub{font-size:11px;color:#64748b}
+    .nav-links{display:flex;gap:2px}
+    .nav-link{padding:6px 14px;border-radius:8px;font-size:13px;color:#64748b;text-decoration:none}
+    .nav-link:hover{background:#f1f5f9;color:#1e293b}
+    .nav-link.active{background:#eff6ff;color:#1a56db;font-weight:500}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .nav-badge{background:#1a56db;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px}
+    .nav-avatar{width:30px;height:30px;border-radius:50%;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#64748b}
+    .page{max-width:1200px;margin:0 auto;padding:24px 16px}
+    .page-header{margin-bottom:20px}
+    .page-title{font-size:22px;font-weight:600;color:#1e293b}
+    .page-sub{font-size:13px;color:#64748b;margin-top:4px}
+    .filters{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .filters label{font-size:12px;color:#64748b;font-weight:500}
+    .filters select, .filters input{padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#1e293b;background:#f8fafc;outline:none}
+    .filters select:focus, .filters input:focus{border-color:#1a56db}
+    .filter-btn{padding:7px 16px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer}
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+    .stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px}
+    .stat-val{font-size:22px;font-weight:600;color:#1e293b}
+    .stat-label{font-size:11px;color:#64748b;margin-top:2px}
+    .stat-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+    .table-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+    .table-header{padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+    .table-title{font-size:14px;font-weight:600}
+    table{width:100%;border-collapse:collapse}
+    th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9}
+    td{padding:11px 16px;font-size:13px;border-bottom:1px solid #f8fafc;color:#1e293b}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:#fafbff}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+    .badge-safe{background:#dcfce7;color:#16a34a}
+    .badge-semi{background:#fef9c3;color:#ca8a04}
+    .badge-critical{background:#ffedd5;color:#ea580c}
+    .badge-over{background:#fee2e2;color:#dc2626}
+    .pagination{display:flex;gap:6px;align-items:center;padding:12px 18px;justify-content:flex-end}
+    .page-btn{width:30px;height:30px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#64748b}
+    .page-btn.active{background:#1a56db;color:#fff;border-color:#1a56db}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">💧</div>
+    <div><div class="nav-title">INGRES Portal</div><div class="nav-sub">India Ground Water Resource Estimation System · CGWB</div></div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Dashboard</a>
+    <a class="nav-link active" href="/assessment">Assessment</a>
+    <a class="nav-link" href="/reports">Reports</a>
+    <a class="nav-link" href="/gis-maps">GIS Maps</a>
+    <a class="nav-link" href="/about">About</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">AI Assistant</span>
+    <div class="nav-avatar"><i class="ti ti-user"></i></div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Groundwater Assessment Data</div>
+    <div class="page-sub">Block/Mandal/Taluk level assessment results · CGWB 2022</div>
+  </div>
+
+  <div class="filters">
+    <div>
+      <label>State</label><br>
+      <select id="stateFilter" onchange="filterTable()">
+        <option value="">All States</option>
+        <option>Punjab</option><option>Haryana</option><option>Rajasthan</option>
+        <option>Uttar Pradesh</option><option>Gujarat</option><option>Maharashtra</option>
+        <option>Madhya Pradesh</option><option>Tamil Nadu</option><option>Karnataka</option>
+        <option>Andhra Pradesh</option><option>Bihar</option><option>West Bengal</option>
+      </select>
+    </div>
+    <div>
+      <label>Category</label><br>
+      <select id="catFilter" onchange="filterTable()">
+        <option value="">All Categories</option>
+        <option>Safe</option>
+        <option>Semi-Critical</option>
+        <option>Critical</option>
+        <option>Over-Exploited</option>
+      </select>
+    </div>
+    <div>
+      <label>Search block</label><br>
+      <input type="text" id="searchInput" placeholder="Type block name..." oninput="filterTable()"/>
+    </div>
+    <button class="filter-btn" onclick="resetFilters()">Reset</button>
+    <a href="/" style="margin-left:auto">
+      <button class="filter-btn" style="background:#f1f5f9;color:#1a56db;border:1px solid #bfdbfe">
+        <i class="ti ti-message"></i> Ask AI about this data
+      </button>
+    </a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val">6,965</div><div class="stat-label">Total assessment units</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#16a34a">3,301</div><div class="stat-label"><span class="stat-dot" style="background:#16a34a"></span>Safe units</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#dc2626">1,006</div><div class="stat-label"><span class="stat-dot" style="background:#dc2626"></span>Over-exploited units</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#ca8a04">1,053</div><div class="stat-label"><span class="stat-dot" style="background:#ca8a04"></span>Semi-critical + Critical</div></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Assessment Units</div>
+      <span style="font-size:12px;color:#64748b" id="rowCount">Showing all records</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="assessTable">
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>District</th>
+            <th>Block / Unit</th>
+            <th>Annual Recharge (MCM)</th>
+            <th>Extraction (MCM)</th>
+            <th>Stage (%)</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {state:"Punjab",district:"Ludhiana",block:"Ludhiana-1",recharge:142,extraction:235,stage:165.5,cat:"Over-Exploited"},
+  {state:"Punjab",district:"Amritsar",block:"Amritsar-2",recharge:118,extraction:189,stage:160.2,cat:"Over-Exploited"},
+  {state:"Punjab",district:"Jalandhar",block:"Jalandhar-1",recharge:156,extraction:198,stage:126.9,cat:"Over-Exploited"},
+  {state:"Haryana",district:"Kurukshetra",block:"Kurukshetra-1",recharge:89,extraction:142,stage:159.6,cat:"Over-Exploited"},
+  {state:"Haryana",district:"Hisar",block:"Hisar-2",recharge:76,extraction:98,stage:128.9,cat:"Over-Exploited"},
+  {state:"Rajasthan",district:"Jaipur",block:"Sanganer",recharge:45,extraction:71,stage:157.8,cat:"Over-Exploited"},
+  {state:"Rajasthan",district:"Jodhpur",block:"Jodhpur-1",recharge:32,extraction:48,stage:150.0,cat:"Over-Exploited"},
+  {state:"Rajasthan",district:"Jalgaon",block:"Jalgaon-2",recharge:67,extraction:52,stage:77.6,cat:"Safe"},
+  {state:"Uttar Pradesh",district:"Agra",block:"Agra-1",recharge:234,extraction:189,stage:80.8,cat:"Safe"},
+  {state:"Uttar Pradesh",district:"Lucknow",block:"Lucknow-2",recharge:312,extraction:198,stage:63.5,cat:"Safe"},
+  {state:"Uttar Pradesh",district:"Varanasi",block:"Varanasi-1",recharge:278,extraction:156,stage:56.1,cat:"Safe"},
+  {state:"Gujarat",district:"Ahmedabad",block:"Ahmedabad-1",recharge:123,extraction:134,stage:108.9,cat:"Semi-Critical"},
+  {state:"Gujarat",district:"Surat",block:"Surat-2",recharge:145,extraction:112,stage:77.2,cat:"Safe"},
+  {state:"Maharashtra",district:"Pune",block:"Pune-1",recharge:189,extraction:134,stage:70.9,cat:"Safe"},
+  {state:"Maharashtra",district:"Nashik",block:"Nashik-2",recharge:167,extraction:98,stage:58.7,cat:"Safe"},
+  {state:"Madhya Pradesh",district:"Bhopal",block:"Bhopal-1",recharge:198,extraction:112,stage:56.6,cat:"Safe"},
+  {state:"Tamil Nadu",district:"Chennai",block:"Chennai-1",recharge:89,extraction:112,stage:125.8,cat:"Over-Exploited"},
+  {state:"Tamil Nadu",district:"Coimbatore",block:"Coimbatore-2",recharge:134,extraction:98,stage:73.1,cat:"Safe"},
+  {state:"Karnataka",district:"Bangalore",block:"Bangalore-1",recharge:112,extraction:134,stage:119.6,cat:"Semi-Critical"},
+  {state:"Andhra Pradesh",district:"Hyderabad",block:"Hyderabad-1",recharge:145,extraction:89,stage:61.4,cat:"Safe"},
+  {state:"Bihar",district:"Patna",block:"Patna-1",recharge:267,extraction:134,stage:50.2,cat:"Safe"},
+  {state:"West Bengal",district:"Kolkata",block:"Kolkata-1",recharge:312,extraction:178,stage:57.1,cat:"Safe"},
+  {state:"Haryana",district:"Karnal",block:"Karnal-1",recharge:98,extraction:134,stage:136.7,cat:"Over-Exploited"},
+  {state:"Gujarat",district:"Vadodara",block:"Vadodara-1",recharge:156,extraction:98,stage:62.8,cat:"Safe"},
+  {state:"Rajasthan",district:"Bikaner",block:"Bikaner-1",recharge:23,extraction:34,stage:147.8,cat:"Over-Exploited"},
+];
+
+const ROWS_PER_PAGE = 10;
+let filtered = [...DATA];
+let currentPage = 1;
+
+function getBadge(cat) {
+  const map = {"Safe":"badge-safe","Semi-Critical":"badge-semi","Critical":"badge-critical","Over-Exploited":"badge-over"};
+  return `<span class="badge ${map[cat]||'badge-safe'}">${cat}</span>`;
+}
+
+function getStageColor(s) {
+  if(s>=100) return "#dc2626";
+  if(s>=90) return "#ea580c";
+  if(s>=70) return "#ca8a04";
+  return "#16a34a";
+}
+
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  const start = (currentPage-1)*ROWS_PER_PAGE;
+  const page = filtered.slice(start, start+ROWS_PER_PAGE);
+  tbody.innerHTML = page.map(r=>`
+    <tr>
+      <td>${r.state}</td>
+      <td>${r.district}</td>
+      <td><strong>${r.block}</strong></td>
+      <td>${r.recharge}</td>
+      <td>${r.extraction}</td>
+      <td style="color:${getStageColor(r.stage)};font-weight:500">${r.stage}%</td>
+      <td>${getBadge(r.cat)}</td>
+    </tr>`).join("");
+  document.getElementById("rowCount").textContent = `Showing ${filtered.length} records`;
+  renderPagination();
+}
+
+function renderPagination() {
+  const pages = Math.ceil(filtered.length/ROWS_PER_PAGE);
+  const pg = document.getElementById("pagination");
+  pg.innerHTML = "";
+  for(let i=1;i<=pages;i++){
+    const btn = document.createElement("div");
+    btn.className = "page-btn" + (i===currentPage?" active":"");
+    btn.textContent = i;
+    btn.onclick = ()=>{ currentPage=i; renderTable(); };
+    pg.appendChild(btn);
+  }
+}
+
+function filterTable() {
+  const state = document.getElementById("stateFilter").value;
+  const cat = document.getElementById("catFilter").value;
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  filtered = DATA.filter(r=>
+    (!state || r.state===state) &&
+    (!cat || r.cat===cat) &&
+    (!search || r.block.toLowerCase().includes(search) || r.district.toLowerCase().includes(search))
+  );
+  currentPage = 1;
+  renderTable();
+}
+
+function resetFilters() {
+  document.getElementById("stateFilter").value="";
+  document.getElementById("catFilter").value="";
+  document.getElementById("searchInput").value="";
+  filtered = [...DATA];
+  currentPage = 1;
+  renderTable();
+}
+
+renderTable();
+</script>
+</body>
+</html>

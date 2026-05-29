@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>INGRES Groundwater Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+
+    /* NAVBAR */
+    .navbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{display:flex;align-items:center;gap:10px}
+    .nav-logo{width:34px;height:34px;background:#1a56db;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+    .nav-title{font-size:15px;font-weight:600;color:#1e293b}
+    .nav-sub{font-size:11px;color:#64748b}
+    .nav-links{display:flex;gap:2px}
+    .nav-link{padding:6px 14px;border-radius:8px;font-size:13px;color:#64748b;cursor:pointer;border:none;background:none;text-decoration:none}
+    .nav-link:hover{background:#f1f5f9;color:#1e293b}
+    .nav-link.active{background:#eff6ff;color:#1a56db;font-weight:500}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .nav-badge{background:#1a56db;color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500}
+    .nav-avatar{width:30px;height:30px;border-radius:50%;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#64748b}
+
+   .layout{display:grid;grid-template-columns:200px 1fr 260px;gap:12px;padding:12px;max-width:1400px;margin:0 auto}
+
+    /* CARDS */
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+    .card-title{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px}
+
+    /* LEFT SIDEBAR */
+    .sidebar{display:flex;flex-direction:column;gap:12px}
+    .quick-btn{width:100%;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#475569;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:all 0.15s}
+    .quick-btn:hover{background:#eff6ff;border-color:#bfdbfe;color:#1a56db}
+    .quick-btn i{color:#1a56db;font-size:14px}
+    .cat-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9}
+    .cat-item:last-child{border-bottom:none}
+    .status-dot{width:8px;height:8px;border-radius:50%;margin-right:7px;display:inline-block;flex-shrink:0}
+    .stat-mini{display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:8px;margin-bottom:5px}
+
+    /* CHAT */
+    .chat-area{display:flex;flex-direction:column;gap:10px}
+    .chat-header{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+    .avatar-wrap{position:relative;width:36px;height:36px;flex-shrink:0}
+    .chat-avatar{width:36px;height:36px;background:#1a56db;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:14px}
+    .online-dot{width:9px;height:9px;background:#16a34a;border-radius:50%;border:2px solid #fff;position:absolute;bottom:0;right:0}
+    .chat-tags{display:flex;gap:5px;flex-wrap:wrap}
+    .ctag{font-size:11px;padding:3px 8px;border:1px solid #e2e8f0;border-radius:20px;color:#64748b;background:#f8fafc}
+
+    /* MESSAGES */
+    .messages{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+    .msg{display:flex;gap:8px;align-items:flex-start}
+    .msg.user{flex-direction:row-reverse}
+    .msg-av{width:28px;height:28px;border-radius:50%;background:#1a56db;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+    .msg-av.u{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;font-size:13px}
+    .msg-body{max-width:76%}
+    .bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.65}
+    .msg.bot .bubble{background:#f8fafc;color:#1e293b;border-bottom-left-radius:4px;border:1px solid #f1f5f9}
+    .msg.user .bubble{background:#1a56db;color:#fff;border-bottom-right-radius:4px}
+    .msg.bot .bubble strong{color:#1a56db}
+    .msg.bot .bubble ul{padding-left:16px;margin:6px 0}
+    .msg.bot .bubble li{margin-bottom:3px}
+    .msg-time{font-size:10px;color:#94a3b8;margin-top:4px;padding:0 2px}
+    .msg.user .msg-time{text-align:right}
+    .src-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+    .src-tag{font-size:10px;padding:2px 7px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;color:#64748b}
+    .typing-bubble{display:flex;gap:5px;align-items:center;padding:12px 14px;background:#f8fafc;border-radius:12px;border-bottom-left-radius:4px;border:1px solid #f1f5f9;width:60px}
+    .typing-bubble span{width:7px;height:7px;border-radius:50%;background:#94a3b8;animation:bounce 1.2s infinite}
+    .typing-bubble span:nth-child(2){animation-delay:.2s}
+    .typing-bubble span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+    .chart-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-top:8px;max-width:100%}
+    .map-wrap{margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;width:100%}
+
+    /* INPUT */
+    .input-bar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center}
+    .input-bar input{flex:1;border:none;background:none;font-size:13px;color:#1e293b;outline:none}
+    .input-bar input::placeholder{color:#94a3b8}
+    .send-btn{background:#1a56db;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:13px;font-weight:500;cursor:pointer}
+    .send-btn:disabled{background:#94a3b8;cursor:not-allowed}
+    .input-actions{display:flex;gap:4px}
+    .icon-btn{width:30px;height:30px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#64748b}
+    .icon-btn:hover{background:#eff6ff;color:#1a56db;border-color:#bfdbfe}
+
+    /* RIGHT PANEL */
+    .info-panel{display:flex;flex-direction:column;gap:12px}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .metric{background:#f8fafc;border-radius:8px;padding:10px 12px}
+    .metric-val{font-size:19px;font-weight:600;color:#1e293b}
+    .metric-label{font-size:11px;color:#64748b;margin-top:2px}
+    .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .bar-label{font-size:11px;color:#475569;width:88px;flex-shrink:0}
+    .bar-track{flex:1;height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+    .bar-num{font-size:11px;color:#94a3b8;width:32px;text-align:right}
+    .lang-badge{display:none;background:#eff6ff;color:#1a56db;font-size:11px;padding:3px 9px;border-radius:20px;align-items:center;gap:4px}
+    .activity-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">💧</div>
+    <div>
+      <div class="nav-title">INGRES Portal</div>
+      <div class="nav-sub">India Ground Water Resource Estimation System · CGWB</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" href="/">Dashboard</a>
+<a class="nav-link" href="/assessment">Assessment</a>
+<a class="nav-link" href="/reports">Reports</a>
+<a class="nav-link" href="/gis-maps">GIS Maps</a>
+<a class="nav-link" href="/about">About</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-badge" id="langBadge">🌐 <span id="langName"></span></div>
+    <span class="nav-badge">AI Assistant</span>
+    <div class="nav-avatar"><i class="ti ti-user"></i></div>
+  </div>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Quick queries</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <button class="quick-btn" onclick="sendQuick('Show recharge by state')"><i class="ti ti-chart-bar"></i>Recharge by state</button>
+        <button class="quick-btn" onclick="sendQuick('Show extraction trend for Punjab')"><i class="ti ti-trending-up"></i>Extraction trend</button>
+        <button class="quick-btn" onclick="sendQuick('Show groundwater map of India')"><i class="ti ti-map"></i>Groundwater map</button>
+        <button class="quick-btn" onclick="sendQuick('Which states are over-exploited?')"><i class="ti ti-alert-triangle"></i>Over-exploited zones</button>
+        <button class="quick-btn" onclick="sendQuick('Show groundwater category statistics')"><i class="ti ti-chart-pie"></i>Category statistics</button>
+        <button class="quick-btn" onclick="sendQuick('Compare recharge vs extraction trend')"><i class="ti ti-arrows-diff"></i>Year comparison</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Assessment categories</div>
+      <div>
+        <div class="cat-item">
+          <span style="display:flex;align-items:center;font-size:12px;color:#1e293b"><span class="status-dot" style="background:#16a34a"></span>Safe</span>
+          <span style="font-size:12px;font-weight:500;color:#64748b">3,301</span>
+        </div>
+        <div class="cat-item">
+          <span style="display:flex;align-items:center;font-size:12px;color:#1e293b"><span class="status-dot" style="background:#ca8a04"></span>Semi-critical</span>
+          <span style="font-size:12px;font-weight:500;color:#64748b">687</span>
+        </div>
+        <div class="cat-item">
+          <span style="display:flex;align-items:center;font-size:12px;color:#1e293b"><span class="status-dot" style="background:#ea580c"></span>Critical</span>
+          <span style="font-size:12px;font-weight:500;color:#64748b">366</span>
+        </div>
+        <div class="cat-item">
+          <span style="display:flex;align-items:center;font-size:12px;color:#1e293b"><span class="status-dot" style="background:#dc2626"></span>Over-exploited</span>
+          <span style="font-size:12px;font-weight:500;color:#64748b">1,006</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Data source</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div class="stat-mini"><span style="font-size:12px;color:#64748b">Assessment year</span><span style="font-size:12px;font-weight:500">2022</span></div>
+        <div class="stat-mini"><span style="font-size:12px;color:#64748b">Total units</span><span style="font-size:12px;font-weight:500">6,965</span></div>
+        <div class="stat-mini"><span style="font-size:12px;color:#64748b">States covered</span><span style="font-size:12px;font-weight:500">29</span></div>
+        <div class="stat-mini"><span style="font-size:12px;color:#64748b">Source</span><span style="font-size:12px;font-weight:500;color:#1a56db">CGWB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER CHAT -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar-wrap">
+          <div class="chat-avatar">G</div>
+          <div class="online-dot"></div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:600">INGRES AI Assistant</div>
+          <div style="font-size:11px;color:#16a34a">Online · Gemini 2.5 Flash + RAG</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="chat-tags">
+          <span class="ctag"><i class="ti ti-brain" style="font-size:11px"></i> RAG</span>
+          <span class="ctag"><i class="ti ti-world" style="font-size:11px"></i> Multilingual</span>
+          <span class="ctag"><i class="ti ti-map-2" style="font-size:11px"></i> Maps</span>
+        </div>
+        <button class="icon-btn" onclick="clearChat()" title="Clear chat"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+
+    <div class="messages" id="chatBox">
+      <div class="msg bot">
+        <div class="msg-av">G</div>
+        <div class="msg-body">
+          <div class="bubble">
+            Hello! I am the INGRES Groundwater Assistant.<br><br>
+            I can answer questions about India's groundwater resources, show interactive charts and maps, and support regional languages. Try the quick queries on the left!
+          </div>
+          <div class="msg-time">Just now</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <i class="ti ti-message" style="font-size:16px;color:#94a3b8"></i>
+      <input type="text" id="userInput" placeholder="Ask about groundwater recharge, districts, maps, extraction..."/>
+      <div class="input-actions">
+        <div class="icon-btn" title="Voice (coming soon)"><i class="ti ti-microphone"></i></div>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="info-panel">
+    <div class="card">
+      <div class="card-title">India snapshot · 2022</div>
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-val">437.6</div><div class="metric-label">Recharge (BCM)</div></div>
+        <div class="metric"><div class="metric-val">241.3</div><div class="metric-label">Extraction (BCM)</div></div>
+        <div class="metric"><div class="metric-val">60.6%</div><div class="metric-label">Extraction stage</div></div>
+        <div class="metric"><div class="metric-val">6,965</div><div class="metric-label">Units assessed</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Top extraction states</div>
+      <div id="barChart">
+        <div class="bar-row"><span class="bar-label">Uttar Pradesh</span><div class="bar-track"><div class="bar-fill" style="width:96%;background:#1a56db"></div></div><span class="bar-num">68.9</span></div>
+        <div class="bar-row"><span class="bar-label">Punjab</span><div class="bar-track"><div class="bar-fill" style="width:51%;background:#dc2626"></div></div><span class="bar-num">35.8</span></div>
+        <div class="bar-row"><span class="bar-label">Rajasthan</span><div class="bar-track"><div class="bar-fill" style="width:36%;background:#ea580c"></div></div><span class="bar-num">25.4</span></div>
+        <div class="bar-row"><span class="bar-label">Haryana</span><div class="bar-track"><div class="bar-fill" style="width:19%;background:#ca8a04"></div></div><span class="bar-num">13.6</span></div>
+        <div class="bar-row"><span class="bar-label">Gujarat</span><div class="bar-track"><div class="bar-fill" style="width:21%;background:#16a34a"></div></div><span class="bar-num">14.9</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Session activity</div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="activityLog">
+        <div style="display:flex;gap:8px"><div class="activity-dot" style="background:#1a56db"></div><span style="font-size:12px;color:#64748b">Session started</span></div>
+        <div style="display:flex;gap:8px"><div class="activity-dot" style="background:#16a34a"></div><span style="font-size:12px;color:#64748b">RAG index loaded · 620 chunks</span></div>
+        <div style="display:flex;gap:8px"><div class="activity-dot" style="background:#ca8a04"></div><span style="font-size:12px;color:#64748b">Gemini 2.5 Flash ready</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Supported languages</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <span class="ctag">English</span><span class="ctag">Hindi</span>
+        <span class="ctag">Telugu</span><span class="ctag">Tamil</span>
+        <span class="ctag">Kannada</span><span class="ctag">Marathi</span>
+        <span class="ctag">Gujarati</span><span class="ctag">Bengali</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+let chartCounter = 0, mapCounter = 0;
+let conversationHistory = [];
+
+const LANG_NAMES = {"hi":"Hindi","te":"Telugu","ta":"Tamil","kn":"Kannada","mr":"Marathi","gu":"Gujarati","bn":"Bengali","pa":"Punjabi"};
+
+userInput.addEventListener("keydown", e => { if(e.key==="Enter") sendMessage(); });
+
+function getTime() {
+  return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function addActivity(text, color="#1a56db") {
+  const log = document.getElementById("activityLog");
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:8px";
+  row.innerHTML = `<div class="activity-dot" style="background:${color};margin-top:4px"></div><span style="font-size:12px;color:#64748b">${text}</span>`;
+  log.appendChild(row);
+  if(log.children.length > 6) log.removeChild(log.firstChild);
+}
+
+function renderChart(chart, wrap) {
+  const id = "chart-" + chartCounter++;
+  const cw = document.createElement("div");
+  cw.className = "chart-wrap";
+  cw.innerHTML = `<canvas id="${id}"></canvas>`;
+  wrap.appendChild(cw);
+
+  setTimeout(() => {
+    const ctx = document.getElementById(id);
+    if(!ctx) return;
+
+    if(chart.multi) {
+      new Chart(ctx, {
+        type:"line",
+        data:{
+          labels:chart.labels,
+          datasets:chart.datasets.map(ds=>({
+            label:ds.label, data:ds.values,
+            borderColor:ds.color, backgroundColor:ds.color+"22",
+            tension:0.4, fill:true, pointRadius:4
+          }))
+        },
+        options:{responsive:true,plugins:{title:{display:true,text:chart.title,font:{size:12}},legend:{position:"bottom"}},scales:{y:{beginAtZero:false}}}
+      });
+      return;
+    }
+
+    if(chart.type==="bar") {
+      new Chart(ctx,{
+        type:"bar",
+        data:{labels:chart.labels,datasets:[{label:chart.title,data:chart.values,backgroundColor:chart.color+"cc",borderColor:chart.color,borderWidth:1,borderRadius:4}]},
+        options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:chart.title,font:{size:12}}},scales:{y:{beginAtZero:true}}}
+      });
+    } else if(chart.type==="line") {
+      new Chart(ctx,{
+        type:"line",
+        data:{labels:chart.labels,datasets:[{label:chart.title,data:chart.values,borderColor:chart.color,backgroundColor:chart.color+"22",tension:0.4,fill:true,pointRadius:5}]},
+        options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:chart.title,font:{size:12}}},scales:{y:{beginAtZero:false}}}
+      });
+    } else if(chart.type==="pie") {
+      new Chart(ctx,{
+        type:"pie",
+        data:{labels:chart.labels,datasets:[{data:chart.values,backgroundColor:chart.colors,borderWidth:2,borderColor:"#fff"}]},
+        options:{responsive:true,plugins:{title:{display:true,text:chart.title,font:{size:12}},legend:{position:"bottom",labels:{font:{size:11}}}}}
+      });
+    }
+  }, 100);
+}
+
+function renderMap(wrap) {
+  const id = "map-" + mapCounter++;
+  const mw = document.createElement("div");
+  mw.className = "map-wrap";
+  mw.innerHTML = `<div id="${id}" style="height:340px"></div>`;
+  wrap.appendChild(mw);
+
+  setTimeout(async () => {
+    const res = await fetch("/map-data");
+    const data = await res.json();
+    const map = L.map(id).setView([22.5,80.0],4);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
+    data.markers.forEach(m => {
+      const color = data.colors[m.category]||"#888";
+      L.circleMarker([m.lat,m.lng],{radius:13,fillColor:color,color:"#fff",weight:2,fillOpacity:0.85})
+        .addTo(map)
+        .bindPopup(`<div style="font-family:sans-serif;min-width:170px">
+          <div style="font-weight:600;font-size:13px;margin-bottom:5px">${m.state}</div>
+          <div style="background:${color}22;border-left:3px solid ${color};padding:3px 8px;border-radius:4px;margin-bottom:5px;font-size:12px;font-weight:500">${m.category}</div>
+          <div style="font-size:12px;line-height:1.8">
+            🔵 Recharge: <strong>${m.recharge} BCM</strong><br>
+            🔴 Extraction: <strong>${m.extraction} BCM</strong><br>
+            📊 Stage: <strong>${m.stage}%</strong>
+          </div></div>`);
+    });
+    const legend = L.control({position:"bottomright"});
+    legend.onAdd = () => {
+      const d = L.DomUtil.create("div");
+      d.style.cssText = "background:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-size:11px";
+      d.innerHTML = "<div style='font-weight:600;margin-bottom:5px'>Category</div>" +
+        Object.entries(data.colors).map(([c,col])=>
+          `<div style='display:flex;align-items:center;gap:5px;margin:3px 0'><div style='width:10px;height:10px;border-radius:50%;background:${col}'></div>${c}</div>`
+        ).join("");
+      return d;
+    };
+    legend.addTo(map);
+  }, 200);
+}
+
+function appendMessage(role, text, sources=[], chart=null, showMap=false) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+
+  if(role==="bot") {
+    const av = document.createElement("div");
+    av.className = "msg-av";
+    av.textContent = "G";
+    div.appendChild(av);
+  } else {
+    const av = document.createElement("div");
+    av.className = "msg-av u";
+    av.innerHTML = '<i class="ti ti-user" style="font-size:13px"></i>';
+    div.appendChild(av);
+  }
+
+  const body = document.createElement("div");
+  body.className = "msg-body";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = role==="bot" ? marked.parse(text) : "";
+  if(role==="user") bubble.textContent = text;
+  body.appendChild(bubble);
+
+  if(chart && role==="bot") renderChart(chart, body);
+  if(showMap && role==="bot") renderMap(body);
+
+  if(sources && sources.length>0) {
+    const sr = document.createElement("div");
+    sr.className = "src-row";
+    sr.innerHTML = "📄 " + sources.map(s=>`<span class='src-tag'>${s}</span>`).join(" ");
+    body.appendChild(sr);
+  }
+
+  const ts = document.createElement("div");
+  ts.className = "msg-time";
+  ts.textContent = getTime();
+  body.appendChild(ts);
+
+  div.appendChild(body);
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function appendTyping() {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.id = "typingIndicator";
+  const av = document.createElement("div");
+  av.className = "msg-av";
+  av.textContent = "G";
+  div.appendChild(av);
+  const tb = document.createElement("div");
+  tb.className = "typing-bubble";
+  tb.innerHTML = "<span></span><span></span><span></span>";
+  div.appendChild(tb);
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById("typingIndicator");
+  if(el) el.remove();
+}
+
+function setLoading(on) {
+  sendBtn.disabled = on;
+  sendBtn.textContent = on ? "..." : "Send";
+}
+
+function clearChat() {
+  chatBox.innerHTML = "";
+  conversationHistory = [];
+  document.getElementById("langBadge").style.display = "none";
+  appendMessage("bot","Chat cleared! Ask me anything about groundwater resources in India.");
+}
+
+function sendQuick(msg) {
+  userInput.value = msg;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const message = userInput.value.trim();
+  if(!message || sendBtn.disabled) return;
+
+  appendMessage("user", message);
+  userInput.value = "";
+  setLoading(true);
+  appendTyping();
+  conversationHistory.push({role:"user", content:message});
+  addActivity(`Query: "${message.substring(0,30)}..."`, "#1a56db");
+
+  try {
+    const res = await fetch("/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message, history:conversationHistory})
+    });
+    const data = await res.json();
+    removeTyping();
+
+    appendMessage("bot", data.response||"No response.", data.sources||[], data.chart||null, data.show_map||false);
+    conversationHistory.push({role:"assistant", content:data.response||""});
+
+    if(data.sources && data.sources.length>0)
+      addActivity(`Retrieved ${data.sources.length} source(s)`, "#16a34a");
+
+    if(data.detected_language && data.detected_language!=="en") {
+      const badge = document.getElementById("langBadge");
+      badge.style.display = "inline-flex";
+      document.getElementById("langName").textContent = LANG_NAMES[data.detected_language]||data.detected_language;
+      addActivity(`Language: ${LANG_NAMES[data.detected_language]||data.detected_language}`, "#ca8a04");
+    }
+
+  } catch(err) {
+    removeTyping();
+    appendMessage("bot","Error: Could not reach the server. Make sure Flask is running.");
+  }
+
+  setLoading(false);
+  userInput.focus();
+}
+</script>
+</body>
+</html>

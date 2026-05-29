@@ -1,0 +1,20 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">💧</div>
+    <div>
+      <div class="nav-title">INGRES Portal</div>
+      <div class="nav-sub">India Ground Water Resource Estimation System · CGWB</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="/">Dashboard</a>
+    <a class="nav-link {% if active == 'assessment' %}active{% endif %}" href="/assessment">Assessment</a>
+    <a class="nav-link {% if active == 'reports' %}active{% endif %}" href="/reports">Reports</a>
+    <a class="nav-link {% if active == 'gis_maps' %}active{% endif %}" href="/gis-maps">GIS Maps</a>
+    <a class="nav-link {% if active == 'about' %}active{% endif %}" href="/about">About</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">AI Assistant</span>
+    <div class="nav-avatar"><i class="ti ti-user"></i></div>
+  </div>
+</nav>
