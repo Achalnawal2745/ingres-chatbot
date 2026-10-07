@@ -39,9 +39,20 @@ llm = ChatGoogleGenerativeAI(
 )
 
 # ─────────────────────────────────────────────────────────────
-# RAG Retriever
+# RAG Retriever (Lazy Loaded)
 # ─────────────────────────────────────────────────────────────
-retriever = get_retriever()
+_retriever = None
+
+def get_rag_retriever():
+    global _retriever
+    if _retriever is None:
+        try:
+            print("[RAG] Initializing retriever...")
+            _retriever = get_retriever()
+        except Exception as e:
+            print(f"[RAG ERROR] Failed to load retriever: {e}")
+            return None
+    return _retriever
 
 # ─────────────────────────────────────────────────────────────
 # System Prompt
@@ -185,7 +196,15 @@ Ask me anything about India's groundwater resources.
         # ─────────────────────────────────────────
         # Retrieve Documents from ChromaDB
         # ─────────────────────────────────────────
-        docs = retriever.invoke(english_message)
+        retriever_instance = get_rag_retriever()
+        if retriever_instance:
+            try:
+                docs = retriever_instance.invoke(english_message)
+            except Exception as e:
+                print(f"[RAG INVOKE ERROR] {e}")
+                docs = []
+        else:
+            docs = []
 
         context = "\n\n".join([
             d.page_content for d in docs
