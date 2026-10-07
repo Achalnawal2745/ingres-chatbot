@@ -115,13 +115,20 @@ def is_greeting(text):
         "nomoshkar",
         "sup",
         "what's up",
-        "whats up"
+        "whats up",
+        "how are you",
+        "how are you?",
+        "how are you doing",
+        "how r u",
+        "who are you",
+        "who are you?"
     ]
 
-    cleaned_text = text.lower().strip()
+    cleaned_text = text.lower().strip().replace("?", "")
 
     return (
         cleaned_text in greetings
+        or any(cleaned_text == g.replace("?", "") for g in greetings)
         or len(cleaned_text) < 4
     )
 

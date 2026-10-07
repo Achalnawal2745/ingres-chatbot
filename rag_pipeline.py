@@ -1,76 +1,73 @@
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+import json
 import os
+import re
 
-# Folder where your PDFs live
 DATA_FOLDER = "./data"
-CHROMA_PATH = "./chroma_store"
+CHUNKS_FILE = os.path.join(DATA_FOLDER, "chunks.json")
 
-_embeddings = None
+class TextChunk:
+    def __init__(self, page_content, metadata):
+        self.page_content = page_content
+        self.metadata = metadata
 
-def get_embeddings():
-    """Lazy load embedding model so startup is not blocked."""
-    global _embeddings
-    if _embeddings is None:
-        print("[RAG] Initializing SentenceTransformerEmbeddings (all-MiniLM-L6-v2)...")
-        _embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    return _embeddings
+class FastRetriever:
+    """Ultra-lightweight keyword and relevance retriever.
+    Runs entirely in memory with 0 MB extra RAM — zero PyTorch needed."""
+    def __init__(self, chunks):
+        self.chunks = chunks
 
-def ingest_documents(max_pages=80):
-    """Load PDFs from data/ folder, chunk them, embed and store in ChromaDB."""
-    all_docs = []
+    def invoke(self, query):
+        if not self.chunks:
+            return []
 
-    if not os.path.exists(DATA_FOLDER):
-        print("Data folder does not exist!")
-        return None
+        # Extract search keywords (minimum 3 characters)
+        words = [w.lower() for w in re.findall(r'[a-zA-Z]{3,}', query)]
+        if not words:
+            # Default to top overview pages
+            return [
+                TextChunk(
+                    c['content'],
+                    {'source': 'GWRA2022_Report.pdf', 'page': c['page']}
+                )
+                for c in self.chunks[:3]
+            ]
 
-    pdf_files = [f for f in os.listdir(DATA_FOLDER) if f.endswith(".pdf")]
-    if not pdf_files:
-        print("No PDFs found in data/ folder!")
-        return None
+        scored = []
+        for c in self.chunks:
+            text = c['content'].lower()
+            score = sum(text.count(w) for w in words)
+            if score > 0:
+                scored.append((score, c))
 
-    print(f"Found {len(pdf_files)} PDF(s): {pdf_files}")
+        scored.sort(key=lambda x: x[0], reverse=True)
+        top = scored[:4] if scored else [(0, c) for c in self.chunks[:2]]
 
-    for filename in pdf_files:
-        path = os.path.join(DATA_FOLDER, filename)
-        print(f"Loading {filename} (indexing up to {max_pages} key pages)...")
-        loader = PyPDFLoader(path)
-        docs = loader.load()
-        if max_pages and len(docs) > max_pages:
-            docs = docs[:max_pages]
-        all_docs.extend(docs)
-        print(f"  → {len(docs)} pages loaded")
+        return [
+            TextChunk(
+                item[1]['content'],
+                {'source': 'GWRA2022_Report.pdf', 'page': item[1]['page']}
+            )
+            for item in top
+        ]
 
-    # Split into chunks
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=150,
-    )
-    chunks = splitter.split_documents(all_docs)
-    print(f"Total chunks created: {len(chunks)}")
-
-    # Store in ChromaDB
-    print("Embedding and storing in ChromaDB...")
-    vectorstore = Chroma.from_documents(
-        chunks,
-        get_embeddings(),
-        persist_directory=CHROMA_PATH,
-    )
-    print(f"Done! {len(chunks)} chunks stored in ChromaDB.")
-    return vectorstore
+_retriever = None
 
 def get_retriever():
-    """Load existing ChromaDB and return a retriever. Ingests key pages if not present."""
-    if not os.path.exists(CHROMA_PATH) or not os.listdir(CHROMA_PATH):
-        print("[RAG] ChromaDB vector store not found or empty. Running initial ingestion...")
-        ingest_documents(max_pages=50)
+    """Load pre-extracted CGWB report chunks into FastRetriever."""
+    global _retriever
+    if _retriever is not None:
+        return _retriever
 
-    if os.path.exists(CHROMA_PATH) and os.listdir(CHROMA_PATH):
-        vectorstore = Chroma(
-            persist_directory=CHROMA_PATH,
-            embedding_function=get_embeddings(),
-        )
-        return vectorstore.as_retriever(search_kwargs={"k": 4})
-    return None
+    chunks = []
+    if os.path.exists(CHUNKS_FILE):
+        try:
+            with open(CHUNKS_FILE, "r", encoding="utf-8") as f:
+                chunks = json.load(f)
+            print(f"[RAG] FastRetriever loaded {len(chunks)} report pages instantly.")
+        except Exception as e:
+            print(f"[RAG] Error loading chunks.json: {e}")
+    else:
+        print(f"[RAG] chunks.json not found at {CHUNKS_FILE}.")
+
+    _retriever = FastRetriever(chunks)
+    return _retriever
