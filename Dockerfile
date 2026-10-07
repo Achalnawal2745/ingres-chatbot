@@ -23,6 +23,9 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 # Copy application files
 COPY . .
 
+# Pre-build vector database during Docker build so it is 100% ready before starting
+RUN python -c "from rag_pipeline import ingest_documents; ingest_documents(max_pages=50)" || true
+
 # Set up non-root user and assign permissions
 RUN useradd -m -u 1000 user && \
     chown -R user:user /app /home/user

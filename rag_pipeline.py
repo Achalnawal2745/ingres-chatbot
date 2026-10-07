@@ -65,10 +65,12 @@ def get_retriever():
     """Load existing ChromaDB and return a retriever. Ingests key pages if not present."""
     if not os.path.exists(CHROMA_PATH) or not os.listdir(CHROMA_PATH):
         print("[RAG] ChromaDB vector store not found or empty. Running initial ingestion...")
-        ingest_documents(max_pages=80)
+        ingest_documents(max_pages=50)
 
-    vectorstore = Chroma(
-        persist_directory=CHROMA_PATH,
-        embedding_function=get_embeddings(),
-    )
-    return vectorstore.as_retriever(search_kwargs={"k": 4})
+    if os.path.exists(CHROMA_PATH) and os.listdir(CHROMA_PATH):
+        vectorstore = Chroma(
+            persist_directory=CHROMA_PATH,
+            embedding_function=get_embeddings(),
+        )
+        return vectorstore.as_retriever(search_kwargs={"k": 4})
+    return None
