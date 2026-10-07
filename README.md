@@ -1,3 +1,13 @@
+---
+title: INGRES AI Groundwater Assistant
+emoji: 💧
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 💧 INGRES AI ChatBot — Groundwater Assistant
 
 An AI-powered virtual assistant for the **India Ground Water Resource Estimation System (INGRES)**, built with Google Gemini, RAG pipeline, Flask, and real CGWB assessment data.

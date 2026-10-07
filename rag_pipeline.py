@@ -49,7 +49,11 @@ def ingest_documents():
     return vectorstore
 
 def get_retriever():
-    """Load existing ChromaDB and return a retriever."""
+    """Load existing ChromaDB and return a retriever. Ingests if not present."""
+    if not os.path.exists(CHROMA_PATH) or not os.listdir(CHROMA_PATH):
+        print("[RAG] ChromaDB vector store not found or empty. Running initial ingestion...")
+        ingest_documents()
+
     vectorstore = Chroma(
         persist_directory=CHROMA_PATH,
         embedding_function=embeddings,
